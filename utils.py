@@ -12,3 +12,4 @@ class ResultLogger(object):
 
     def close(self):
         self.f_log.close()
+
