@@ -165,18 +165,28 @@ def infer(sess, model, hps, iterator):
     ori = np.concatenate(ori, axis=0)
     x = np.concatenate(xs, axis=0)
     z = np.concatenate(zs, axis=0)
+    print(z.shape)
 
+    # interpolation
     x1_2 = interpolation(y, z[1].reshape(1, 512), z[2].reshape(1, 512), model)
     x1_2 = np.reshape(x1_2, [11, 8, 8, 8])
     display_center_slices(x1_2, 8, 11, hps.logdir)
-    np.save('logs/x.npy', x)
-    np.save('logs/z.npy', z)
+    np.save(hps.logdir+'/x.npy', x)
+    np.save(hps.logdir+'/z.npy', z)
     ori = np.reshape(ori, [hps.full_test_its, 8, 8, 8])
     x = np.reshape(x, [hps.full_test_its, 8, 8, 8])
     z = np.reshape(z, [hps.full_test_its, 8, 8, 8])
-    ori = ori[:, 3, :]
+
+    # calculate generalization
+    gen = np.mean(np.reshape(abs(ori - x), [hps.full_test_its, 8*8*8]), axis=1)
+    generalization = np.mean(gen)
+    print('generalization = %f' % generalization)
+    gen.reshape(-1,)
+    np.savetxt(os.path.join(hps.logdir, 'generalization.csv'), gen, delimiter=",")
+
+    ori_a = ori[:, 3, :]
     x_a = x[:, 3, :]
-    visualize_slices(ori, x_a, hps.logdir)
+    visualize_slices(ori_a, x_a, hps.logdir)
     return zs
 
 
