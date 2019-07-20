@@ -163,8 +163,8 @@ def model(sess, hps, train_iterator, test_iterator, data_init):
 
     # ???
     def postprocess(x):
-        # return tf.cast(tf.clip_by_value(tf.floor((x + .5)*hps.n_bins)*(256./hps.n_bins), 0, 255), 'uint8')
-        return x
+        return tf.cast(tf.clip_by_value(tf.floor((x + .5)*hps.n_bins)*(668./hps.n_bins), 0, 667), 'double')
+        # return x
 
     def _f_loss(x, y, is_training, reuse=False):
 
@@ -381,7 +381,7 @@ def revnet3d_step(name, z, logdet, hps, reverse):
                 h = f("f1", z1, hps.width, n_z)
                 shift = h[:, :, :, :, 0::2]
                 # scale = tf.exp(h[:, :, :, 1::2])
-                scale = tf.nn.sigmoid(h[:, :, :, :, 1::2] + 2.)
+                scale = tf.nn.sigmoid(h[:, :, :, :, 1::2] + 2.) + 1e-7
                 z2 += shift
                 z2 *= scale
                 logdet += tf.reduce_sum(tf.log(scale), axis=[1, 2, 3, 4])
@@ -401,7 +401,7 @@ def revnet3d_step(name, z, logdet, hps, reverse):
                 h = f("f1", z1, hps.width, n_z)
                 shift = h[:, :, :, :, 0::2]
                 # scale = tf.exp(h[:, :, :, 1::2])
-                scale = tf.nn.sigmoid(h[:, :, :, :, 1::2] + 2.)
+                scale = tf.nn.sigmoid(h[:, :, :, :, 1::2] + 2.) + 1e-7
                 z2 /= scale
                 z2 -= shift
                 logdet -= tf.reduce_sum(tf.log(scale), axis=[1, 2, 3, 4])
@@ -593,3 +593,4 @@ def split3d_prior(z):
     mean = h[:, :, :, :, 0::2]
     logs = h[:, :, :, :, 1::2]
     return Z.gaussian_diag(mean, logs)
+
