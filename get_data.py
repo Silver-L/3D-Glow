@@ -60,6 +60,21 @@ def get_data(sess, data_dir, shards, rank, pmap, fmap, n_batch_train, n_batch_te
     return train_itr, valid_itr, data_init
 
 
+def get_data_for_test(sess, data_dir, shards, rank, pmap, fmap, n_batch_train, n_batch_test, n_batch_init):
+
+    train_file = get_tfr_file(data_dir, 'train')
+    valid_file = get_tfr_file(data_dir, 'test')
+
+    train_itr = input_fn(train_file, shards, rank, pmap,
+                         fmap, n_batch_train, True)
+    valid_itr = input_fn(valid_file, shards, rank, pmap,
+                         fmap, n_batch_test, False)
+
+    data_init = make_batch(sess, train_itr, n_batch_train, n_batch_init)
+
+    return train_itr, valid_itr, data_init
+
+
 def make_batch(sess, itr, itr_batch_size, required_batch_size):
     ib, rb = itr_batch_size, required_batch_size
     #assert rb % ib == 0
